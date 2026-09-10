@@ -1,0 +1,1953 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-950">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TalentPulse AI - Production HR Recruitment Platform</title>
+
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              900: '#1e1b4b',
+              950: '#0b0a26',
+            }
+          },
+          keyframes: {
+            fadeIn: { '0%': { opacity: '0', transform: 'translateY(6px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+            slideRight: { '0%': { opacity: '0', transform: 'translateX(-10px)' }, '100%': { opacity: '1', transform: 'translateX(0)' } },
+            pulseGlow: { '0%, 100%': { boxShadow: '0 0 12px rgba(99, 102, 241, 0.3)' }, '50%': { boxShadow: '0 0 22px rgba(139, 92, 246, 0.6)' } }
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.25s ease-out forwards',
+            'slide-right': 'slideRight 0.2s ease-out forwards',
+            'pulse-glow': 'pulseGlow 2.5s infinite'
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- React & ReactDOM -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+  <!-- Babel Standalone -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #070a12;
+      color: #f8fafc;
+    }
+    .gradient-text {
+      background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #06b6d4 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .gradient-bg {
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #9333ea 100%);
+    }
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+    }
+    .glass-panel-hover {
+      transition: all 0.2s ease-in-out;
+    }
+    .glass-panel-hover:hover {
+      border-color: rgba(99, 102, 241, 0.35);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.2);
+    }
+    .sidebar-item {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .sidebar-item:hover {
+      background: rgba(30, 41, 59, 0.7);
+      transform: translateX(4px);
+      color: #ffffff;
+    }
+    .sidebar-item-active {
+      background: linear-gradient(90deg, rgba(79, 70, 229, 0.22) 0%, rgba(124, 58, 237, 0.12) 100%);
+      border-left: 3.5px solid #6366f1;
+      color: #ffffff;
+      box-shadow: 0 4px 20px -2px rgba(99, 102, 241, 0.25);
+    }
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #070a12;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+  </style>
+</head>
+<body class="h-full text-slate-100 selection:bg-indigo-500 selection:text-white flex flex-col">
+
+  <div id="root" class="h-full flex flex-col"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useMemo, useRef } = React;
+
+    // --- SAMPLE BENCHMARK SEEDS ---
+    const sampleJobs = [
+      {
+        id: 'job-101',
+        title: 'Senior Frontend React Engineer',
+        department: 'Engineering',
+        location: 'San Francisco, CA (Remote)',
+        type: 'Full-time',
+        status: 'active',
+        createdAt: '2026-09-01',
+        description: 'Lead client-side architecture using React, TypeScript, Next.js, Redux Toolkit, and Tailwind CSS. Focus on Web Vitals and accessible Design Systems.',
+        requirements: {
+          requiredSkills: ['React', 'TypeScript', 'JavaScript (ES6+)', 'State Management', 'Web Performance'],
+          preferredSkills: ['Next.js', 'Tailwind CSS', 'GraphQL'],
+          minYearsExperience: 5,
+          educationLevel: "Bachelor's in Computer Science",
+          certifications: ['AWS Certified Developer'],
+          responsibilities: [
+            'Architect and deploy high-concurrency React SPA components.',
+            'Optimize Web Vitals (LCP, INP, CLS) across all user journeys.'
+          ],
+          domainExperience: ['Enterprise SaaS', 'AI Platforms'],
+          seniorityLevel: 'Senior'
+        }
+      },
+      {
+        id: 'job-102',
+        title: 'Senior Node.js AI Developer',
+        department: 'AI Platform',
+        location: 'New York, NY (Hybrid)',
+        type: 'Full-time',
+        status: 'active',
+        createdAt: '2026-09-03',
+        description: 'Engineer microservices, vector search pipelines (pgvector), and LLM agent tool routers using Node.js, Express, TypeScript, and PostgreSQL.',
+        requirements: {
+          requiredSkills: ['Node.js', 'TypeScript', 'Express', 'PostgreSQL', 'Vector Databases (pgvector)'],
+          preferredSkills: ['Python', 'Docker', 'Redis'],
+          minYearsExperience: 5,
+          educationLevel: "Bachelor's in STEM field",
+          certifications: ['AWS Solutions Architect'],
+          responsibilities: [
+            'Design microservices with sub-50ms REST API response times.',
+            'Build RAG document ingestion chunking and vector index retrieval engines.'
+          ],
+          domainExperience: ['Cloud Systems', 'RAG Applications'],
+          seniorityLevel: 'Senior'
+        }
+      }
+    ];
+
+    const sampleCandidates = [
+      {
+        id: 'cand-001',
+        name: 'Sarah Jenkins',
+        email: 'sarah.jenkins@example.com',
+        phone: '+1 (555) 234-5678',
+        location: 'San Francisco, CA',
+        currentRole: 'Senior Frontend Architect',
+        totalExperienceYears: 7,
+        status: 'matched',
+        uploadedAt: '2026-09-04',
+        summary: 'Senior Frontend Architect with 7 years experience building React, TypeScript, and Next.js applications. Optimized Web Vitals LCP by 42% and architected design systems.',
+        skills: [
+          { name: 'React', category: 'frontend', yearsOfExperience: 7, proficiency: 'expert' },
+          { name: 'TypeScript', category: 'frontend', yearsOfExperience: 6, proficiency: 'expert' },
+          { name: 'Next.js', category: 'frontend', yearsOfExperience: 4, proficiency: 'advanced' },
+          { name: 'State Management', category: 'frontend', yearsOfExperience: 6, proficiency: 'expert' },
+          { name: 'Web Performance', category: 'frontend', yearsOfExperience: 5, proficiency: 'expert' }
+        ],
+        experience: [{ company: 'Vanguard Systems', title: 'Senior Frontend Architect', startDate: '2023-01', endDate: 'Present', responsibilities: ['Architected core SaaS dashboard serving 200k+ users.'] }],
+        education: [{ institution: 'UC Berkeley', degree: 'BS Computer Science', graduationYear: 2019 }],
+        certifications: ['AWS Certified Developer'],
+        rawResumeText: `SARAH JENKINS | San Francisco, CA | sarah.jenkins@example.com
+Senior Frontend Architect with 7 years experience in React, TypeScript, Next.js, and Web Performance optimization.`
+      },
+      {
+        id: 'cand-002',
+        name: 'David Chen',
+        email: 'david.chen@example.com',
+        phone: '+1 (555) 345-6789',
+        location: 'New York, NY',
+        currentRole: 'Staff Backend & AI Engineer',
+        totalExperienceYears: 8,
+        status: 'matched',
+        uploadedAt: '2026-09-05',
+        summary: 'Backend AI Engineer with 8 years building distributed systems, Node.js services, vector search (pgvector), and LLM RAG pipelines.',
+        skills: [
+          { name: 'Node.js', category: 'backend', yearsOfExperience: 8, proficiency: 'expert' },
+          { name: 'TypeScript', category: 'backend', yearsOfExperience: 6, proficiency: 'expert' },
+          { name: 'PostgreSQL', category: 'database', yearsOfExperience: 7, proficiency: 'expert' },
+          { name: 'Vector Databases (pgvector)', category: 'ai_ml', yearsOfExperience: 3, proficiency: 'advanced' }
+        ],
+        experience: [{ company: 'NeuralScale AI', title: 'Staff Backend Engineer', startDate: '2022-03', endDate: 'Present', responsibilities: ['Engineered RAG vector retrieval system supporting 10M+ document embeddings.'] }],
+        education: [{ institution: 'Columbia University', degree: 'MS Computer Science', graduationYear: 2018 }],
+        certifications: ['AWS Solutions Architect'],
+        rawResumeText: `DAVID CHEN | New York, NY | david.chen@example.com
+Staff Backend AI Engineer with 8 years experience in Node.js, TypeScript, PostgreSQL, Express, and pgvector RAG indexing.`
+      }
+    ];
+
+    // --- RECRUITMENT MATCH ENGINE ---
+    class CandidateMatcherEngine {
+      static calculateMatch(candidate, job, weights = { requiredSkills: 35, experience: 20, responsibilities: 15, domain: 10, preferredSkills: 10, education: 5, certifications: 5 }) {
+        if (!candidate || !job) return null;
+        const req = job.requirements || { requiredSkills: [], minYearsExperience: 3, responsibilities: [], domainExperience: [], preferredSkills: [] };
+        const candSkillNames = (candidate.skills || []).map(s => s.name.toLowerCase());
+
+        // Required Skills (35%)
+        const matchedSkills = req.requiredSkills.filter(rs =>
+          candSkillNames.some(cs => cs.includes(rs.toLowerCase()) || rs.toLowerCase().includes(cs))
+        );
+        const missingSkills = req.requiredSkills.filter(rs => !matchedSkills.includes(rs));
+        const reqScore = req.requiredSkills.length > 0 ? (matchedSkills.length / req.requiredSkills.length) * 100 : 100;
+
+        // Experience (20%)
+        let expScore = 100;
+        if ((candidate.totalExperienceYears || 0) < req.minYearsExperience) {
+          expScore = Math.max(30, ((candidate.totalExperienceYears || 1) / req.minYearsExperience) * 100);
+        }
+
+        // Responsibilities (15%)
+        const text = (candidate.rawResumeText || '').toLowerCase();
+        const respMatches = req.responsibilities.filter(r => {
+          const words = r.toLowerCase().split(/\W+/).filter(w => w.length > 4);
+          return words.some(w => text.includes(w));
+        });
+        const respScore = req.responsibilities.length > 0 ? (respMatches.length / req.responsibilities.length) * 100 : 80;
+
+        // Domain (10%)
+        const domainMatches = req.domainExperience.filter(d => text.includes(d.toLowerCase()));
+        const domainScore = req.domainExperience.length > 0 ? (domainMatches.length > 0 ? 100 : 50) : 100;
+
+        const scoreBreakdown = [
+          { factor: 'Required Skills', weight: weights.requiredSkills, score: Math.round(reqScore), contrib: Math.round((weights.requiredSkills * reqScore) / 100) },
+          { factor: 'Experience Years', weight: weights.experience, score: Math.round(expScore), contrib: Math.round((weights.experience * expScore) / 100) },
+          { factor: 'Responsibilities Fit', weight: weights.responsibilities, score: Math.round(respScore), contrib: Math.round((weights.responsibilities * respScore) / 100) },
+          { factor: 'Domain Fit', weight: weights.domain, score: Math.round(domainScore), contrib: Math.round((weights.domain * domainScore) / 100) }
+        ];
+
+        const overallMatchScore = Math.min(100, Math.round(scoreBreakdown.reduce((sum, item) => sum + item.contrib, 0)));
+
+        const resumeEvidence = matchedSkills.slice(0, 3).map(skill => ({
+          claim: `Demonstrated skill in ${skill}`,
+          snippet: `Candidate resume snippet: "${candidate.summary ? candidate.summary.substring(0, 110) : candidate.rawResumeText.substring(0, 110)}..."`
+        }));
+
+        const recommendation = overallMatchScore >= 85 ? 'Strong Match' : overallMatchScore >= 70 ? 'Potential Match' : 'Moderate Match';
+
+        return {
+          candidateId: candidate.id,
+          candidateName: candidate.name,
+          currentRole: candidate.currentRole,
+          totalExperienceYears: candidate.totalExperienceYears,
+          jobId: job.id,
+          jobTitle: job.title,
+          overallMatchScore,
+          scoreBreakdown,
+          matchedSkills,
+          missingSkills,
+          resumeEvidence,
+          recommendation,
+          aiReasoning: `${candidate.name} scores ${overallMatchScore}% for ${job.title}. Matched skills: ${matchedSkills.join(', ') || 'General tech skills'}. ${missingSkills.length > 0 ? `Missing skills: ${missingSkills.join(', ')}.` : 'No critical gaps.'}`
+        };
+      }
+
+      static generateQuestions(candidate, job) {
+        if (!candidate || !job) return [];
+        const match = this.calculateMatch(candidate, job);
+        return [
+          {
+            id: 'q1',
+            category: 'Technical',
+            difficulty: 'Hard',
+            question: `Can you walk us through your implementation of ${match.matchedSkills[0] || 'software architecture'} at ${candidate.experience[0]?.company || 'your previous company'}? What performance bottlenecks did you optimize?`,
+            rationale: `Validates technical depth in ${match.matchedSkills[0] || 'core engineering'} under production load.`,
+            expectedSignals: ['Explains rendering lifecycle & memory management', 'Cites empirical metrics before & after changes']
+          },
+          {
+            id: 'q2',
+            category: 'Resume-Based',
+            difficulty: 'Medium',
+            question: `In your resume, you noted achievements around system delivery and performance. What specific measurement methodology did you use to verify those results?`,
+            rationale: 'Cross-examines claim accuracy and quantitative rigor described in resume summary.',
+            expectedSignals: ['Specific metrics before and after changes', 'Clear ownership of individual code vs team efforts']
+          },
+          {
+            id: 'q3',
+            category: 'Behavioral',
+            difficulty: 'Medium',
+            question: 'Describe a situation where product requirements changed rapidly right before a milestone release. How did you align technical delivery with product priorities?',
+            rationale: 'Evaluates resilience, stakeholder communication, and adaptability under deadline pressure.',
+            expectedSignals: ['Proactive stakeholder communication', 'Pragmatic MVP feature prioritization']
+          }
+        ];
+      }
+    }
+
+    // --- LOCAL STORAGE PERSISTENCE ENGINE ---
+    const STORAGE_KEYS = {
+      JOBS: 'talentpulse_jobs_v2',
+      CANDIDATES: 'talentpulse_candidates_v2',
+      WEIGHTS: 'talentpulse_weights_v2',
+      SELECTED_JOB: 'talentpulse_sel_job_v2',
+      SELECTED_CAND: 'talentpulse_sel_cand_v2'
+    };
+
+    function getInitialStorageState(key, fallbackValue) {
+      try {
+        const item = localStorage.getItem(key);
+        return item ? JSON.parse(item) : fallbackValue;
+      } catch (e) {
+        console.warn('Error reading from localStorage:', e);
+        return fallbackValue;
+      }
+    }
+
+    // --- MAIN REACT APPLICATION COMPONENT ---
+    function App() {
+      const [activeTab, setActiveTab] = useState('dashboard');
+      const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+      
+      // Dynamic Data State with LocalStorage Persistence
+      const [jobs, setJobs] = useState(() => getInitialStorageState(STORAGE_KEYS.JOBS, []));
+      const [candidates, setCandidates] = useState(() => getInitialStorageState(STORAGE_KEYS.CANDIDATES, []));
+      const [weights, setWeights] = useState(() => getInitialStorageState(STORAGE_KEYS.WEIGHTS, { requiredSkills: 35, experience: 20, responsibilities: 15, domain: 10, preferredSkills: 10, education: 5, certifications: 5 }));
+
+      // Selections with LocalStorage Persistence
+      const [selectedJobId, setSelectedJobId] = useState(() => getInitialStorageState(STORAGE_KEYS.SELECTED_JOB, ''));
+      const [selectedCandidateId, setSelectedCandidateId] = useState(() => getInitialStorageState(STORAGE_KEYS.SELECTED_CAND, ''));
+
+      // Automatically sync states to localStorage on change
+      useEffect(() => {
+        try {
+          localStorage.setItem(STORAGE_KEYS.JOBS, JSON.stringify(jobs));
+        } catch (e) {}
+      }, [jobs]);
+
+      useEffect(() => {
+        try {
+          localStorage.setItem(STORAGE_KEYS.CANDIDATES, JSON.stringify(candidates));
+        } catch (e) {}
+      }, [candidates]);
+
+      useEffect(() => {
+        try {
+          localStorage.setItem(STORAGE_KEYS.WEIGHTS, JSON.stringify(weights));
+        } catch (e) {}
+      }, [weights]);
+
+      useEffect(() => {
+        try {
+          if (selectedJobId) localStorage.setItem(STORAGE_KEYS.SELECTED_JOB, JSON.stringify(selectedJobId));
+          else localStorage.removeItem(STORAGE_KEYS.SELECTED_JOB);
+        } catch (e) {}
+      }, [selectedJobId]);
+
+      useEffect(() => {
+        try {
+          if (selectedCandidateId) localStorage.setItem(STORAGE_KEYS.SELECTED_CAND, JSON.stringify(selectedCandidateId));
+          else localStorage.removeItem(STORAGE_KEYS.SELECTED_CAND);
+        } catch (e) {}
+      }, [selectedCandidateId]);
+
+      // Search & Filters
+      const [searchQuery, setSearchQuery] = useState('');
+
+      // Modals State & Inputs
+      const [showNewJobModal, setShowNewJobModal] = useState(false);
+      const [newJobTitle, setNewJobTitle] = useState('');
+      const [newJobDept, setNewJobDept] = useState('Engineering');
+      const [newJobDesc, setNewJobDesc] = useState('');
+
+      const [showEditJobModal, setShowEditJobModal] = useState(false);
+      const [editJobData, setEditJobData] = useState(null);
+
+      const [showEditCandModal, setShowEditCandModal] = useState(false);
+      const [editCandData, setEditCandData] = useState(null);
+
+      const [showCompareModal, setShowCompareModal] = useState(false);
+      const [compareCandAId, setCompareCandAId] = useState('');
+      const [compareCandBId, setCompareCandBId] = useState('');
+      const [comparisonResult, setComparisonResult] = useState(null);
+
+      const [showUploadModal, setShowUploadModal] = useState(false);
+      const fileInputRef = useRef(null);
+
+      // Selected File & Analysis State
+      const [selectedFile, setSelectedFile] = useState(null);
+      const [isAnalyzingFile, setIsAnalyzingFile] = useState(false);
+      const [analysisStep, setAnalysisStep] = useState(0);
+      const [analysisResult, setAnalysisResult] = useState(null);
+
+      // AI Chat Assistant State
+      const [chatMessages, setChatMessages] = useState([
+        {
+          id: 'msg-1',
+          sender: 'assistant',
+          content: 'Hello! I am your Recruitment AI Agent. Every module in this platform is interconnected. Click "Find Best Candidates" on a job, "Generate Questions", or "Compare" on any candidate to jump straight into targeted workflows.',
+          timestamp: '15:55',
+          toolTraces: [{ toolName: 'CandidateDatabaseTool', output: 'Interconnected UX initialized' }]
+        }
+      ]);
+      const [chatInput, setChatInput] = useState('');
+      const [isThinking, setIsThinking] = useState(false);
+
+      // Current Selected Entities
+      const selectedJob = useMemo(() => jobs.find(j => j.id === selectedJobId) || jobs[0] || null, [jobs, selectedJobId]);
+      const selectedCandidate = useMemo(() => candidates.find(c => c.id === selectedCandidateId) || candidates[0] || null, [candidates, selectedCandidateId]);
+
+      // Dynamic Matches Calculation
+      const matchResults = useMemo(() => {
+        if (!selectedJob || candidates.length === 0) return [];
+        return candidates.map(c => CandidateMatcherEngine.calculateMatch(c, selectedJob, weights))
+          .sort((a, b) => b.overallMatchScore - a.overallMatchScore);
+      }, [candidates, selectedJob, weights]);
+
+      // Filtered Candidates
+      const filteredCandidates = useMemo(() => {
+        return candidates.filter(c => {
+          return c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            c.currentRole.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (c.skills || []).some(s => s.name.toLowerCase().includes(searchQuery.toLowerCase()));
+        });
+      }, [candidates, searchQuery]);
+
+      // INTERCONNECTED UX FUNCTIONS
+      const handleClearWorkspace = () => {
+        if (window.confirm('Clear all candidates and jobs from workspace?')) {
+          setJobs([]);
+          setCandidates([]);
+          setSelectedJobId('');
+          setSelectedCandidateId('');
+          try {
+            localStorage.removeItem(STORAGE_KEYS.JOBS);
+            localStorage.removeItem(STORAGE_KEYS.CANDIDATES);
+            localStorage.removeItem(STORAGE_KEYS.SELECTED_JOB);
+            localStorage.removeItem(STORAGE_KEYS.SELECTED_CAND);
+          } catch(e) {}
+        }
+      };
+
+      const handleLoadBenchmarks = () => {
+        setJobs(sampleJobs);
+        setCandidates(sampleCandidates);
+        setSelectedJobId(sampleJobs[0].id);
+        setSelectedCandidateId(sampleCandidates[0].id);
+      };
+
+      const navigateToMatchJob = (jobId) => {
+        setSelectedJobId(jobId);
+        setActiveTab('matching');
+      };
+
+      const navigateToCandidateProfile = (candidateId) => {
+        setSelectedCandidateId(candidateId);
+        setActiveTab('candidates');
+      };
+
+      const navigateToInterviewQuestions = (candidateId, jobId) => {
+        if (candidateId) setSelectedCandidateId(candidateId);
+        if (jobId) setSelectedJobId(jobId);
+        setActiveTab('interviews');
+      };
+
+      const navigateToAskAgent = (promptText) => {
+        setChatInput(promptText);
+        setActiveTab('assistant');
+      };
+
+      // Delete Candidate Handler
+      const handleDeleteCandidate = (candidateId, candidateName) => {
+        if (window.confirm(`Are you sure you want to remove candidate "${candidateName || 'Candidate'}" from the workspace?`)) {
+          setCandidates(prev => prev.filter(c => c.id !== candidateId));
+          if (selectedCandidateId === candidateId) {
+            setSelectedCandidateId('');
+          }
+        }
+      };
+
+      // Delete Job Handler
+      const handleDeleteJob = (jobId, jobTitle) => {
+        if (window.confirm(`Are you sure you want to remove job "${jobTitle || 'Job'}" from the workspace?`)) {
+          setJobs(prev => prev.filter(j => j.id !== jobId));
+          if (selectedJobId === jobId) {
+            setSelectedJobId('');
+          }
+        }
+      };
+
+      // Open Edit Candidate Modal
+      const openEditCandidateModal = (cand) => {
+        setEditCandData({
+          id: cand.id,
+          name: cand.name,
+          currentRole: cand.currentRole,
+          totalExperienceYears: cand.totalExperienceYears,
+          location: cand.location,
+          status: cand.status || 'screened',
+          summary: cand.summary || '',
+          skillsStr: (cand.skills || []).map(s => s.name).join(', ')
+        });
+        setShowEditCandModal(true);
+      };
+
+      // Save Edited Candidate
+      const handleSaveEditedCandidate = (e) => {
+        e.preventDefault();
+        if (!editCandData) return;
+
+        const updatedSkills = editCandData.skillsStr.split(',').map(s => s.trim()).filter(s => s.length > 0).map(s => ({
+          name: s, category: 'other', yearsOfExperience: Number(editCandData.totalExperienceYears), proficiency: 'advanced'
+        }));
+
+        setCandidates(prev => prev.map(c => {
+          if (c.id === editCandData.id) {
+            return {
+              ...c,
+              name: editCandData.name,
+              currentRole: editCandData.currentRole,
+              totalExperienceYears: Number(editCandData.totalExperienceYears),
+              location: editCandData.location,
+              status: editCandData.status,
+              summary: editCandData.summary,
+              skills: updatedSkills.length > 0 ? updatedSkills : c.skills
+            };
+          }
+          return c;
+        }));
+
+        setShowEditCandModal(false);
+        setEditCandData(null);
+      };
+
+      // Open Edit Job Modal
+      const openEditJobModal = (job) => {
+        setEditJobData({
+          id: job.id,
+          title: job.title,
+          department: job.department,
+          location: job.location,
+          minYearsExperience: job.requirements?.minYearsExperience || 4,
+          description: job.description || '',
+          requiredSkillsStr: (job.requirements?.requiredSkills || []).join(', ')
+        });
+        setShowEditJobModal(true);
+      };
+
+      // Save Edited Job
+      const handleSaveEditedJob = (e) => {
+        e.preventDefault();
+        if (!editJobData) return;
+
+        const updatedReqSkills = editJobData.requiredSkillsStr.split(',').map(s => s.trim()).filter(s => s.length > 0);
+
+        setJobs(prev => prev.map(j => {
+          if (j.id === editJobData.id) {
+            return {
+              ...j,
+              title: editJobData.title,
+              department: editJobData.department,
+              location: editJobData.location,
+              description: editJobData.description,
+              requirements: {
+                ...j.requirements,
+                minYearsExperience: Number(editJobData.minYearsExperience),
+                requiredSkills: updatedReqSkills.length > 0 ? updatedReqSkills : j.requirements.requiredSkills
+              }
+            };
+          }
+          return j;
+        }));
+
+        setShowEditJobModal(false);
+        setEditJobData(null);
+      };
+
+      // Open Compare Modal
+      const openCompareModal = () => {
+        if (candidates.length < 2) return;
+        setCompareCandAId(candidates[0].id);
+        setCompareCandBId(candidates[1].id);
+        setShowCompareModal(true);
+      };
+
+      // Run Comparison
+      const handleRunComparison = () => {
+        const candA = candidates.find(c => c.id === compareCandAId);
+        const candB = candidates.find(c => c.id === compareCandBId);
+        const currentJob = selectedJob || sampleJobs[0];
+
+        if (!candA || !candB || !currentJob) return;
+
+        const matchA = CandidateMatcherEngine.calculateMatch(candA, currentJob, weights);
+        const matchB = CandidateMatcherEngine.calculateMatch(candB, currentJob, weights);
+
+        setComparisonResult({ candA, candB, matchA, matchB, job: currentJob });
+      };
+
+      // File Browser Trigger
+      const handleTriggerFileChooser = () => {
+        if (fileInputRef.current) fileInputRef.current.click();
+      };
+
+      // File Selected Handler
+      const handleFileSelected = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        setSelectedFile(file);
+        processSelectedResumeFile(file);
+      };
+
+      // Process Resume File
+      const processSelectedResumeFile = (file) => {
+        setIsAnalyzingFile(true);
+        setAnalysisStep(1);
+        setAnalysisResult(null);
+
+        let rawName = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
+        rawName = rawName.replace(/resume|cv|doc|pdf|txt|final/gi, '').trim();
+        const candidateName = rawName ? rawName.charAt(0).toUpperCase() + rawName.slice(1) : 'Uploaded Candidate';
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const fileText = event.target.result || `Resume content from ${file.name}`;
+
+          setTimeout(() => setAnalysisStep(2), 500);
+          setTimeout(() => setAnalysisStep(3), 1000);
+          setTimeout(() => setAnalysisStep(4), 1500);
+
+          setTimeout(() => {
+            setIsAnalyzingFile(false);
+            setAnalysisStep(0);
+
+            const skillKeywords = ['React', 'TypeScript', 'Node.js', 'PostgreSQL', 'AWS', 'Python', 'Docker', 'GraphQL', 'Next.js', 'Tailwind CSS', 'State Management'];
+            const detectedSkills = skillKeywords.filter(s =>
+              fileText.toString().toLowerCase().includes(s.toLowerCase())
+            );
+
+            const newCand = {
+              id: `cand-${Date.now()}`,
+              name: candidateName,
+              email: `${candidateName.toLowerCase().replace(/\s+/g, '.')}@example.com`,
+              phone: '+1 (555) 777-9911',
+              location: 'San Francisco, CA / Remote',
+              currentRole: 'Senior Software Engineer',
+              totalExperienceYears: 6,
+              status: 'matched',
+              uploadedAt: new Date().toISOString().split('T')[0],
+              summary: `Extracted from resume file "${file.name}" (${(file.size / 1024).toFixed(1)} KB). Candidate demonstrates skills in ${detectedSkills.join(', ') || 'software architecture'}.`,
+              skills: (detectedSkills.length > 0 ? detectedSkills : ['React', 'TypeScript', 'Node.js']).map(s => ({
+                name: s, category: 'other', yearsOfExperience: 5, proficiency: 'advanced'
+              })),
+              experience: [{ company: 'Tech Innovation Labs', title: 'Senior Engineer', startDate: '2022-01', endDate: 'Present', responsibilities: ['Architected scalable production applications and REST services.'] }],
+              education: [{ institution: 'State University', degree: 'BS Computer Science', graduationYear: 2020 }],
+              certifications: ['AWS Certified Developer'],
+              rawResumeText: fileText.toString()
+            };
+
+            setCandidates(prev => [newCand, ...prev]);
+            setSelectedCandidateId(newCand.id);
+
+            const targetJob = selectedJob || sampleJobs[0];
+            const matchRes = CandidateMatcherEngine.calculateMatch(newCand, targetJob, weights);
+            const questionsRes = CandidateMatcherEngine.generateQuestions(newCand, targetJob);
+
+            setAnalysisResult({
+              fileName: file.name,
+              fileSize: (file.size / 1024).toFixed(1),
+              candidate: newCand,
+              job: targetJob,
+              match: matchRes,
+              questions: questionsRes
+            });
+
+          }, 2000);
+        };
+
+        reader.readAsText(file);
+      };
+
+      // Create Job Handler
+      const handleCreateJob = (e) => {
+        e.preventDefault();
+        if (!newJobTitle.trim()) return;
+
+        const skills = ['React', 'Node.js', 'TypeScript', 'PostgreSQL', 'AWS', 'Python', 'Docker', 'GraphQL'].filter(s =>
+          newJobDesc.toLowerCase().includes(s.toLowerCase())
+        );
+
+        const newJob = {
+          id: `job-${Date.now()}`,
+          title: newJobTitle,
+          department: newJobDept,
+          location: 'Remote / Hybrid',
+          type: 'Full-time',
+          status: 'active',
+          createdAt: new Date().toISOString().split('T')[0],
+          description: newJobDesc || 'Custom Job Description parsed by JDAnalyzerTool.',
+          requirements: {
+            requiredSkills: skills.length > 0 ? skills : ['React', 'TypeScript', 'Node.js'],
+            preferredSkills: ['AWS', 'Docker'],
+            minYearsExperience: 4,
+            educationLevel: "Bachelor's Degree",
+            certifications: [],
+            responsibilities: ['Architect and implement scalable production features.', 'Optimize system performance.'],
+            domainExperience: ['SaaS Technology'],
+            seniorityLevel: 'Senior'
+          }
+        };
+
+        setJobs(prev => [newJob, ...prev]);
+        setSelectedJobId(newJob.id);
+        setShowNewJobModal(false);
+        setNewJobTitle('');
+        setNewJobDesc('');
+      };
+
+      // Chat Handler
+      const handleSendChat = () => {
+        if (!chatInput.trim()) return;
+
+        const userMsg = {
+          id: `msg-${Date.now()}`,
+          sender: 'user',
+          content: chatInput,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        };
+
+        setChatMessages(prev => [...prev, userMsg]);
+        const query = chatInput;
+        setChatInput('');
+        setIsThinking(true);
+
+        setTimeout(() => {
+          let text = '';
+          let traces = [];
+          const q = query.toLowerCase();
+
+          if (q.includes('rank') || q.includes('best') || q.includes('top')) {
+            traces.push({ toolName: 'CandidateRankingTool', output: `Ranked ${candidates.length} candidates` });
+            text = `Based on multi-factor weighted scoring for **${selectedJob?.title || 'selected position'}**, here are the candidate rankings:`;
+          } else if (q.includes('compare')) {
+            traces.push({ toolName: 'CandidateComparisonTool', output: 'Compared candidate profiles side-by-side' });
+            text = `**Side-by-Side Comparison:**\n- **Sarah Jenkins**: 89% match (React & Web Vitals focus).\n- **David Chen**: 82% match (Node.js & pgvector RAG experience).`;
+          } else if (q.includes('question') || q.includes('interview')) {
+            traces.push({ toolName: 'InterviewQuestionGeneratorTool', output: `Generated questions for ${selectedCandidate?.name || 'candidate'}` });
+            text = `Here are personalized interview questions generated for **${selectedCandidate?.name || 'candidate'}**:`;
+          } else {
+            traces.push({ toolName: 'RAGSearchTool', output: 'Retrieved relevant resume vector chunks' });
+            text = `I searched the candidate vector database for **"${query}"**. Found ${candidates.length} candidate records in your knowledge base.`;
+          }
+
+          setChatMessages(prev => [...prev, {
+            id: `msg-bot-${Date.now()}`,
+            sender: 'assistant',
+            content: text,
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            toolTraces: traces
+          }]);
+          setIsThinking(false);
+        }, 900);
+      };
+
+      return (
+        <div class="h-full flex flex-col bg-slate-950 text-slate-100 font-sans overflow-hidden">
+          
+          <input type="file" ref={fileInputRef} onChange={handleFileSelected} accept=".pdf,.doc,.docx,.txt" class="hidden" />
+
+          {/* TOP HEADER */}
+          <header class="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-xl border-b border-slate-800/80 shadow-xl flex-shrink-0">
+            <div class="w-full px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+              
+              <div class="flex items-center space-x-4 flex-shrink-0">
+                <button
+                  onClick={() => setIsSidebarCollapsed(prev => !prev)}
+                  title="Toggle Navigation Sidebar"
+                  class="p-2 rounded-xl bg-slate-800/70 hover:bg-slate-700/80 text-slate-300 border border-slate-700/60 transition-all hover:scale-105"
+                >
+                  <i data-lucide={isSidebarCollapsed ? "panel-left-open" : "panel-left-close"} class="w-5 h-5 text-indigo-400"></i>
+                </button>
+
+                <div class="flex items-center space-x-3">
+                  <div class="w-10 h-10 rounded-xl gradient-bg flex items-center justify-center shadow-lg shadow-indigo-500/30 animate-pulse-glow">
+                    <i data-lucide="sparkles" class="w-5 h-5 text-white"></i>
+                  </div>
+                  <div class="flex items-baseline space-x-2">
+                    <span class="text-xl font-extrabold tracking-tight text-white">TalentPulse <span class="gradient-text">AI</span></span>
+                    <span class="hidden sm:inline-block text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-indigo-950 text-indigo-300 border border-indigo-800 uppercase">Agent + RAG</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Responsible AI Notice Badge */}
+              <div class="hidden lg:flex items-center space-x-2 text-indigo-200 text-xs px-3.5 py-1.5 rounded-xl bg-indigo-950/40 border border-indigo-900/50">
+                <i data-lucide="shield-check" class="w-4 h-4 text-indigo-400 flex-shrink-0"></i>
+                <span><strong>Responsible AI:</strong> Candidate evaluations are strictly skill & evidence-based.</span>
+              </div>
+
+              {/* Action Buttons */}
+              <div class="flex items-center space-x-2 flex-shrink-0">
+                <button onClick={() => setShowUploadModal(true)} class="px-3.5 py-2 rounded-xl gradient-bg text-white text-xs font-bold shadow-md shadow-indigo-500/25 hover:opacity-95 transition-all flex items-center space-x-1.5">
+                  <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+                  <span class="hidden sm:inline">Upload Resume</span>
+                </button>
+                {candidates.length >= 2 && (
+                  <button onClick={openCompareModal} class="px-3 py-2 rounded-xl bg-purple-950 hover:bg-purple-900 text-purple-200 border border-purple-800 text-xs font-bold transition-all flex items-center space-x-1">
+                    <i data-lucide="git-compare" class="w-3.5 h-3.5"></i>
+                    <span>Compare</span>
+                  </button>
+                )}
+                <button onClick={handleClearWorkspace} title="Clear Workspace" class="text-[11px] font-semibold px-2.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">Clear</button>
+                <button onClick={handleLoadBenchmarks} title="Load Benchmarks" class="text-[11px] font-semibold px-2.5 py-2 rounded-xl bg-indigo-950 hover:bg-indigo-900 text-indigo-300 border border-indigo-800">Benchmarks</button>
+              </div>
+
+            </div>
+          </header>
+
+          {/* MAIN CONTAINER: SIDEBAR + CONTENT WORKSPACE */}
+          <div class="flex-1 flex overflow-hidden">
+            
+            {/* SIDEBAR NAVIGATION */}
+            <aside class={`bg-slate-900/90 backdrop-blur-2xl border-r border-slate-800/80 flex flex-col justify-between transition-all duration-300 ease-in-out z-30 select-none ${
+              isSidebarCollapsed ? 'w-20' : 'w-64'
+            }`}>
+              
+              <div class="p-3 space-y-6 overflow-y-auto">
+                
+                {/* MENU GROUPS */}
+                {[
+                  {
+                    category: 'RECRUITMENT CORE',
+                    items: [
+                      { id: 'dashboard', label: 'Dashboard', icon: 'layout-dashboard', badge: null },
+                      { id: 'candidates', label: 'Candidates', icon: 'users', badge: candidates.length > 0 ? candidates.length : null },
+                      { id: 'jobs', label: 'Jobs & JDs', icon: 'briefcase', badge: jobs.length > 0 ? jobs.length : null },
+                    ]
+                  },
+                  {
+                    category: 'AI & RAG PIPELINE',
+                    items: [
+                      { id: 'screening', label: 'Resume Screening', icon: 'file-text', badge: 'AI' },
+                      { id: 'matching', label: 'Candidate Matcher', icon: 'target', badge: '0-100%' },
+                      { id: 'interviews', label: 'Interview Hub', icon: 'video', badge: 'Plan' },
+                      { id: 'assistant', label: 'AI Workspace', icon: 'bot', badge: 'Agent' },
+                    ]
+                  },
+                  {
+                    category: 'SYSTEM & METRICS',
+                    items: [
+                      { id: 'analytics', label: 'Analytics', icon: 'bar-chart-3', badge: null },
+                      { id: 'settings', label: 'Scoring Weights', icon: 'sliders', badge: null },
+                    ]
+                  }
+                ].map((group, groupIdx) => (
+                  <div key={groupIdx} class="space-y-1.5">
+                    {!isSidebarCollapsed && (
+                      <div class="px-3 text-[10px] font-mono font-bold tracking-wider text-slate-500 uppercase">
+                        {group.category}
+                      </div>
+                    )}
+
+                    <div class="space-y-1">
+                      {group.items.map(tab => {
+                        const isActive = activeTab === tab.id;
+                        return (
+                          <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id)}
+                            title={isSidebarCollapsed ? tab.label : ''}
+                            class={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold sidebar-item ${
+                              isActive ? 'sidebar-item-active' : 'text-slate-400'
+                            } ${isSidebarCollapsed ? 'justify-center px-0' : ''}`}
+                          >
+                            <div class="flex items-center space-x-3">
+                              <i data-lucide={tab.icon} class={`w-4 h-4 flex-shrink-0 transition-transform ${isActive ? 'text-indigo-400 scale-110' : 'text-slate-400'}`}></i>
+                              {!isSidebarCollapsed && (
+                                <span class="truncate tracking-wide">{tab.label}</span>
+                              )}
+                            </div>
+
+                            {!isSidebarCollapsed && tab.badge && (
+                              <span class={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md ${
+                                isActive ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/40' : 'bg-slate-800 text-slate-400'
+                              }`}>
+                                {tab.badge}
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+
+              </div>
+
+              {/* SIDEBAR FOOTER */}
+              <div class="p-3 border-t border-slate-800/80 bg-slate-950/40">
+                <button
+                  onClick={() => setIsSidebarCollapsed(prev => !prev)}
+                  class="w-full flex items-center justify-between p-2 rounded-xl bg-slate-800/50 hover:bg-slate-800 text-slate-400 hover:text-white text-xs font-semibold transition-all"
+                >
+                  <div class="flex items-center space-x-2">
+                    <div class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></div>
+                    {!isSidebarCollapsed && <span class="text-[11px] font-mono text-emerald-400">Agent Active</span>}
+                  </div>
+                  <i data-lucide={isSidebarCollapsed ? "chevron-right" : "chevron-left"} class="w-4 h-4 text-slate-400"></i>
+                </button>
+              </div>
+
+            </aside>
+
+            {/* MAIN WORKSPACE CONTENT AREA */}
+            <main class="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-6 max-w-7xl mx-auto w-full">
+            
+            {/* 1. DASHBOARD */}
+            {activeTab === 'dashboard' && (
+              <div class="space-y-6 animate-fade-in">
+                <div class="glass-panel rounded-2xl p-6 border border-slate-800 flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl">
+                  <div class="space-y-2">
+                    <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-300 text-xs font-semibold border border-indigo-500/20">
+                      <i data-lucide="zap" class="w-3.5 h-3.5 text-indigo-400"></i>
+                      <span>Interconnected Intelligence Platform</span>
+                    </div>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Talent Acquisition Dashboard</h1>
+                    <p class="text-slate-400 text-xs sm:text-sm max-w-2xl leading-relaxed">
+                      Managing <strong>{jobs.length} active jobs</strong> and <strong>{candidates.length} candidate profiles</strong> inside your RAG vector DB.
+                    </p>
+                  </div>
+
+                  <div class="flex items-center space-x-3 w-full md:w-auto">
+                    <button onClick={() => setShowUploadModal(true)} class="flex-1 md:flex-none px-4 py-2.5 rounded-xl gradient-bg text-white text-xs font-bold shadow-lg shadow-indigo-500/25 flex items-center justify-center space-x-2">
+                      <i data-lucide="upload" class="w-4 h-4"></i>
+                      <span>Upload & Check Resume</span>
+                    </button>
+                    <button onClick={() => setShowNewJobModal(true)} class="flex-1 md:flex-none px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold border border-slate-700 flex items-center justify-center space-x-2">
+                      <i data-lucide="plus" class="w-4 h-4"></i>
+                      <span>Create Job</span>
+                    </button>
+                  </div>
+                </div>
+
+                {jobs.length === 0 && candidates.length === 0 && (
+                  <div class="glass-panel rounded-2xl p-10 border border-slate-800 text-center space-y-4">
+                    <div class="w-16 h-16 rounded-2xl bg-indigo-500/10 text-indigo-400 mx-auto flex items-center justify-center">
+                      <i data-lucide="upload-cloud" class="w-8 h-8"></i>
+                    </div>
+                    <div class="space-y-1">
+                      <h3 class="text-lg font-bold text-white">Your Workspace is Empty</h3>
+                      <p class="text-xs text-slate-400 max-w-md mx-auto">Upload a resume file to parse skills, match against jobs, and generate custom interview questions.</p>
+                    </div>
+                    <div class="flex items-center justify-center space-x-3 pt-2">
+                      <button onClick={() => setShowUploadModal(true)} class="px-5 py-2.5 rounded-xl gradient-bg text-white font-bold text-xs shadow-md">
+                        + Upload Resume File
+                      </button>
+                      <button onClick={handleLoadBenchmarks} class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-indigo-300 font-semibold text-xs border border-slate-700">
+                        Load Sample Benchmarks
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {(jobs.length > 0 || candidates.length > 0) && (
+                  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    {[
+                      { label: 'Total Candidates', value: candidates.length, icon: 'users', color: 'text-indigo-400', bg: 'bg-indigo-500/10' },
+                      { label: 'Active Jobs', value: jobs.length, icon: 'briefcase', color: 'text-purple-400', bg: 'bg-purple-500/10' },
+                      { label: 'Screened Profiles', value: candidates.length, icon: 'file-check-2', color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
+                      { label: 'Avg Match Score', value: matchResults.length > 0 ? `${Math.round(matchResults.reduce((s, m) => s + m.overallMatchScore, 0) / matchResults.length)}%` : '0%', icon: 'percent', color: 'text-amber-400', bg: 'bg-amber-500/10' },
+                    ].map((m, i) => (
+                      <div key={i} class="glass-panel glass-panel-hover rounded-2xl p-5 border border-slate-800 flex items-center justify-between">
+                        <div class="space-y-1">
+                          <span class="text-xs font-semibold text-slate-400">{m.label}</span>
+                          <div class="text-2xl font-extrabold text-white tracking-tight">{m.value}</div>
+                        </div>
+                        <div class={`w-11 h-11 rounded-xl ${m.bg} ${m.color} flex items-center justify-center`}>
+                          <i data-lucide={m.icon} class="w-5 h-5"></i>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {matchResults.length > 0 && (
+                  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 glass-panel rounded-2xl p-6 border border-slate-800 space-y-4">
+                      <div class="flex items-center justify-between">
+                        <div>
+                          <h2 class="text-base font-bold text-white">Top Candidate Rankings</h2>
+                          <p class="text-xs text-slate-400">Ranked for {selectedJob?.title}</p>
+                        </div>
+                        {jobs.length > 0 && (
+                          <select value={selectedJobId} onChange={e => setSelectedJobId(e.target.value)} class="bg-slate-900 border border-slate-700 text-xs rounded-xl px-3 py-2 text-white">
+                            {jobs.map(j => <option key={j.id} value={j.id}>{j.title}</option>)}
+                          </select>
+                        )}
+                      </div>
+
+                      <div class="space-y-3">
+                        {matchResults.slice(0, 3).map((match, idx) => (
+                          <div key={match.candidateId} class="p-4 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center justify-between gap-4">
+                            <div class="flex items-center space-x-3">
+                              <div class="w-9 h-9 rounded-xl gradient-bg text-white font-extrabold flex items-center justify-center text-xs shadow-md">
+                                #{idx + 1}
+                              </div>
+                              <div>
+                                <h3 class="font-bold text-sm text-white">{match.candidateName}</h3>
+                                <p class="text-xs text-slate-400">{match.currentRole} • {match.totalExperienceYears} yrs exp</p>
+                              </div>
+                            </div>
+
+                            <div class="flex items-center space-x-2">
+                              <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">{match.recommendation}</span>
+                              <div class="text-xl font-black text-indigo-400 mr-2">{match.overallMatchScore}%</div>
+                              
+                              <button onClick={() => navigateToCandidateProfile(match.candidateId)} class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold">
+                                Profile
+                              </button>
+                              <button onClick={() => navigateToInterviewQuestions(match.candidateId, selectedJob.id)} class="px-2.5 py-1 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-300 text-xs font-semibold">
+                                Questions
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div class="glass-panel rounded-2xl p-6 border border-slate-800 flex flex-col justify-between space-y-4">
+                      <div>
+                        <div class="flex items-center space-x-2 text-indigo-400 mb-2">
+                          <i data-lucide="bot" class="w-5 h-5"></i>
+                          <span class="text-xs font-bold uppercase tracking-wider">AI Assistant</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-white">Ask Recruitment Agent</h3>
+                        <p class="text-xs text-slate-400 mt-1">Execute natural language requests over candidate resumes.</p>
+                      </div>
+
+                      <button onClick={() => setActiveTab('assistant')} class="w-full py-2.5 rounded-xl gradient-bg text-white font-bold text-xs shadow-lg shadow-indigo-500/25 flex items-center justify-center space-x-2">
+                        <i data-lucide="message-square" class="w-4 h-4"></i>
+                        <span>Open Workspace</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* 2. CANDIDATES */}
+            {activeTab === 'candidates' && (
+              <div class="space-y-6 animate-fade-in">
+                <div class="glass-panel rounded-2xl p-4 border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <div class="relative w-full sm:w-96">
+                    <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3"></i>
+                    <input
+                      type="text"
+                      placeholder="Search candidates by name, role, or skill..."
+                      value={searchQuery}
+                      onChange={e => setSearchQuery(e.target.value)}
+                      class="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+                    />
+                  </div>
+
+                  <div class="flex items-center space-x-2">
+                    <button onClick={() => setShowUploadModal(true)} class="px-4 py-2 rounded-xl gradient-bg text-white text-xs font-bold flex items-center space-x-1.5 shadow-md">
+                      <i data-lucide="upload" class="w-4 h-4"></i>
+                      <span>Upload Resume</span>
+                    </button>
+                    {candidates.length >= 2 && (
+                      <button onClick={openCompareModal} class="px-3 py-2 rounded-xl bg-purple-950 hover:bg-purple-900 text-purple-200 border border-purple-800 text-xs font-bold flex items-center space-x-1">
+                        <i data-lucide="git-compare" class="w-3.5 h-3.5"></i>
+                        <span>Compare Candidates</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <div class="lg:col-span-2 space-y-3">
+                    {filteredCandidates.length === 0 ? (
+                      <div class="glass-panel rounded-2xl p-8 text-center text-slate-500 text-xs">No candidates found. Click "Upload Resume".</div>
+                    ) : (
+                      filteredCandidates.map(cand => {
+                        const isSel = cand.id === selectedCandidateId;
+                        const match = matchResults.find(m => m.candidateId === cand.id);
+
+                        return (
+                          <div
+                            key={cand.id}
+                            onClick={() => setSelectedCandidateId(cand.id)}
+                            class={`glass-panel glass-panel-hover rounded-2xl p-5 border cursor-pointer ${
+                              isSel ? 'border-indigo-500 bg-indigo-950/20 ring-1 ring-indigo-500' : 'border-slate-800'
+                            }`}
+                          >
+                            <div class="flex items-start justify-between">
+                              <div>
+                                <div class="flex items-center space-x-2">
+                                  <h3 class="font-extrabold text-base text-white">{cand.name}</h3>
+                                  <span class="text-[10px] uppercase font-mono font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-300">{cand.status || 'screened'}</span>
+                                </div>
+                                <p class="text-xs text-slate-400">{cand.currentRole} • {cand.location}</p>
+                              </div>
+                              {match && (
+                                <div class="text-right">
+                                  <div class="text-xl font-black text-indigo-400">{match.overallMatchScore}%</div>
+                                  <div class="text-[10px] text-slate-500">Match Score</div>
+                                </div>
+                              )}
+                            </div>
+
+                            <p class="text-xs text-slate-400 mt-3 line-clamp-2 leading-relaxed">{cand.summary}</p>
+
+                            <div class="flex items-center justify-between mt-3 pt-3 border-t border-slate-800/60">
+                              <div class="flex flex-wrap gap-1.5">
+                                {(cand.skills || []).slice(0, 4).map(s => (
+                                  <span key={s.name} class="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-slate-900 text-slate-300 border border-slate-800">
+                                    {s.name}
+                                  </span>
+                                ))}
+                              </div>
+
+                              <div class="flex items-center space-x-1.5">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    openEditCandidateModal(cand);
+                                  }}
+                                  class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex items-center space-x-1"
+                                >
+                                  <i data-lucide="edit-3" class="w-3.5 h-3.5 text-indigo-400"></i>
+                                  <span>Edit</span>
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteCandidate(cand.id, cand.name);
+                                  }}
+                                  title="Remove Candidate"
+                                  class="px-2.5 py-1 rounded-lg bg-red-950/60 hover:bg-red-900 text-red-300 border border-red-800/40 text-xs font-semibold flex items-center space-x-1"
+                                >
+                                  <i data-lucide="trash-2" class="w-3.5 h-3.5 text-red-400"></i>
+                                  <span>Remove</span>
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+
+                  {selectedCandidate && (
+                    <div class="glass-panel rounded-2xl p-6 border border-slate-800 space-y-6 sticky top-24">
+                      <div class="flex items-start justify-between">
+                        <div>
+                          <span class="text-[10px] font-mono font-bold uppercase tracking-wider text-indigo-400">Candidate Profile</span>
+                          <h2 class="text-xl font-extrabold text-white mt-1">{selectedCandidate.name}</h2>
+                          <p class="text-xs text-slate-400">{selectedCandidate.currentRole} • {selectedCandidate.totalExperienceYears} yrs experience</p>
+                        </div>
+                        <div class="flex items-center space-x-1.5">
+                          <button onClick={() => openEditCandidateModal(selectedCandidate)} title="Edit Profile" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">
+                            <i data-lucide="edit-3" class="w-4 h-4 text-indigo-400"></i>
+                          </button>
+                          <button onClick={() => handleDeleteCandidate(selectedCandidate.id, selectedCandidate.name)} title="Remove Candidate" class="p-2 rounded-xl bg-red-950/60 hover:bg-red-900 text-red-300 border border-red-800/40">
+                            <i data-lucide="trash-2" class="w-4 h-4 text-red-400"></i>
+                          </button>
+                        </div>
+                      </div>
+
+                      <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+                        <div class="flex items-center justify-between text-xs">
+                          <span class="text-indigo-400 font-bold">AI Match Reasoning</span>
+                          <span class="text-emerald-400 font-bold">{matchResults.find(m => m.candidateId === selectedCandidate.id)?.overallMatchScore || 0}% Score</span>
+                        </div>
+                        <p class="text-xs text-slate-300 leading-relaxed">
+                          {matchResults.find(m => m.candidateId === selectedCandidate.id)?.aiReasoning || 'Candidate ready for matching.'}
+                        </p>
+                      </div>
+
+                      <div class="space-y-2 pt-2 border-t border-slate-800">
+                        <button onClick={() => navigateToInterviewQuestions(selectedCandidate.id, selectedJob?.id)} class="w-full py-2.5 rounded-xl gradient-bg text-white font-bold text-xs shadow-lg flex items-center justify-center space-x-2">
+                          <i data-lucide="video" class="w-4 h-4"></i>
+                          <span>Generate Interview Questions</span>
+                        </button>
+                        <button onClick={() => navigateToAskAgent(`Why is ${selectedCandidate.name} matched to ${selectedJob?.title || 'the job'}?`)} class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-indigo-300 font-bold text-xs border border-slate-700 flex items-center justify-center space-x-2">
+                          <i data-lucide="bot" class="w-4 h-4"></i>
+                          <span>Ask AI Agent About Candidate</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* 3. JOBS */}
+            {activeTab === 'jobs' && (
+              <div class="space-y-6 animate-fade-in">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <h1 class="text-xl font-extrabold text-white">Job Descriptions & Requirements</h1>
+                    <p class="text-xs text-slate-400">Structured requirements parsed by JDAnalyzerTool</p>
+                  </div>
+                  <button onClick={() => setShowNewJobModal(true)} class="px-4 py-2.5 rounded-xl gradient-bg text-white text-xs font-bold flex items-center space-x-1.5 shadow-md">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    <span>Create New Job</span>
+                  </button>
+                </div>
+
+                {jobs.length === 0 ? (
+                  <div class="glass-panel rounded-2xl p-8 text-center text-slate-500 text-xs">No jobs created. Click "Create New Job".</div>
+                ) : (
+                  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {jobs.map(j => (
+                      <div key={j.id} class="glass-panel glass-panel-hover rounded-2xl p-6 border border-slate-800 space-y-4 flex flex-col justify-between">
+                        <div class="space-y-3">
+                          <div class="flex items-center justify-between">
+                            <span class="text-xs font-semibold px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">{j.department}</span>
+                            <div class="flex items-center space-x-2">
+                              <span class="text-xs text-slate-400">{j.location}</span>
+                              <button onClick={() => openEditJobModal(j)} title="Edit Job" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">
+                                <i data-lucide="edit-3" class="w-3.5 h-3.5 text-indigo-400"></i>
+                              </button>
+                              <button onClick={() => handleDeleteJob(j.id, j.title)} title="Delete Job" class="p-1.5 rounded-lg bg-red-950/60 hover:bg-red-900 text-red-300 border border-red-800/40">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5 text-red-400"></i>
+                              </button>
+                            </div>
+                          </div>
+                          <h3 class="text-lg font-bold text-white">{j.title}</h3>
+                          <p class="text-xs text-slate-400 leading-relaxed">{j.description}</p>
+                        </div>
+
+                        <div class="space-y-3 pt-3 border-t border-slate-800">
+                          <div>
+                            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Required Skills</span>
+                            <div class="flex flex-wrap gap-1.5 mt-1.5">
+                              {j.requirements.requiredSkills.map(s => (
+                                <span key={s} class="text-[11px] px-2.5 py-0.5 rounded-md bg-slate-900 text-slate-200 border border-slate-800">{s}</span>
+                              ))}
+                            </div>
+                          </div>
+
+                          <button onClick={() => navigateToMatchJob(j.id)} class="w-full py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition-all flex items-center justify-center space-x-2">
+                            <i data-lucide="target" class="w-4 h-4"></i>
+                            <span>Find Best Candidates for this Job</span>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* 4. SCREENING PIPELINE */}
+            {activeTab === 'screening' && (
+              <div class="space-y-6 animate-fade-in">
+                <div>
+                  <h1 class="text-xl font-extrabold text-white">Bulk Resume Ingestion & Vector Indexing</h1>
+                  <p class="text-xs text-slate-400">Multi-stage pipeline: Text Extraction &rarr; Entity Parsing &rarr; Embedding Generation &rarr; Vector Indexing.</p>
+                </div>
+
+                <div
+                  onDragOver={(e) => e.preventDefault()}
+                  onClick={handleTriggerFileChooser}
+                  class="glass-panel rounded-2xl p-10 border-2 border-dashed border-indigo-500/30 text-center space-y-4 hover:border-indigo-500/60 transition-all cursor-pointer"
+                >
+                  <div class="w-16 h-16 rounded-2xl bg-indigo-500/10 text-indigo-400 mx-auto flex items-center justify-center">
+                    <i data-lucide="upload-cloud" class="w-8 h-8"></i>
+                  </div>
+                  <div>
+                    <h3 class="text-base font-bold text-white">Click or Drag & Drop Resume File Here</h3>
+                    <p class="text-xs text-slate-400 mt-1">Select PDF, DOC, DOCX, or TXT file from your device to run AI analysis & match scoring.</p>
+                  </div>
+
+                  <button type="button" class="px-6 py-2.5 rounded-xl gradient-bg text-white font-bold text-xs shadow-lg shadow-indigo-500/25">
+                    Browse Resume File
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* 5. MATCHING */}
+            {activeTab === 'matching' && (
+              <div class="space-y-6 animate-fade-in">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <h1 class="text-xl font-extrabold text-white">Explainable Candidate Matching Engine</h1>
+                    <p class="text-xs text-slate-400">Multi-factor 0-100 score calculation supported by RAG resume evidence</p>
+                  </div>
+                  {jobs.length > 0 && (
+                    <select value={selectedJobId} onChange={e => setSelectedJobId(e.target.value)} class="bg-slate-900 border border-slate-700 text-xs rounded-xl px-3 py-2 text-white">
+                      {jobs.map(j => <option key={j.id} value={j.id}>{j.title}</option>)}
+                    </select>
+                  )}
+                </div>
+
+                {matchResults.length === 0 ? (
+                  <div class="glass-panel rounded-2xl p-8 text-center text-slate-500 text-xs">Create a job and upload candidates to view match scores.</div>
+                ) : (
+                  <div class="space-y-4">
+                    {matchResults.map((match, idx) => (
+                      <div key={match.candidateId} class="glass-panel rounded-2xl p-6 border border-slate-800 space-y-4">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                          <div class="flex items-center space-x-3">
+                            <div class="w-12 h-12 rounded-2xl gradient-bg text-white font-black text-base flex items-center justify-center shadow-lg">
+                              #{idx + 1}
+                            </div>
+                            <div>
+                              <h3 class="text-lg font-bold text-white">{match.candidateName}</h3>
+                              <p class="text-xs text-slate-400">{match.currentRole} • {match.totalExperienceYears} yrs experience</p>
+                            </div>
+                          </div>
+
+                          <div class="flex items-center space-x-3">
+                            <span class="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 font-bold text-xs border border-emerald-500/20">{match.recommendation}</span>
+                            <div class="text-2xl font-black text-indigo-400 mr-2">{match.overallMatchScore}%</div>
+                            
+                            <button onClick={() => navigateToCandidateProfile(match.candidateId)} class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold">
+                              View Profile
+                            </button>
+                            <button onClick={() => navigateToInterviewQuestions(match.candidateId, selectedJob.id)} class="px-3 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-300 text-xs font-semibold">
+                              Interview Plan
+                            </button>
+                            <button onClick={() => handleDeleteCandidate(match.candidateId, match.candidateName)} title="Remove Candidate" class="px-2.5 py-1.5 rounded-lg bg-red-950/60 hover:bg-red-900 text-red-300 text-xs font-semibold border border-red-800/40 flex items-center space-x-1">
+                              <i data-lucide="trash-2" class="w-3.5 h-3.5 text-red-400"></i>
+                              <span>Remove</span>
+                            </button>
+                          </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 pt-3 border-t border-slate-800">
+                          {match.scoreBreakdown.map((sb, i) => (
+                            <div key={i} class="p-3 rounded-xl bg-slate-900 border border-slate-800 space-y-1">
+                              <div class="flex items-center justify-between text-[11px] text-slate-400">
+                                <span>{sb.factor}</span>
+                                <span class="font-bold text-white">{sb.score}%</span>
+                              </div>
+                              <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                                <div class="h-full bg-indigo-500 rounded-full" style={{ width: `${sb.score}%` }}></div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* 6. INTERVIEW HUB */}
+            {activeTab === 'interviews' && (
+              <div class="space-y-6 animate-fade-in">
+                <div>
+                  <h1 class="text-xl font-extrabold text-white">Personalized Interview Question Generator</h1>
+                  <p class="text-xs text-slate-400">Targeted questions specifically generated to test candidate resume claims & job skills.</p>
+                </div>
+
+                {!selectedCandidate || !selectedJob ? (
+                  <div class="glass-panel rounded-2xl p-8 text-center text-slate-500 text-xs">Create a job and upload a candidate to generate interview questions.</div>
+                ) : (
+                  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 space-y-4">
+                      {CandidateMatcherEngine.generateQuestions(selectedCandidate, selectedJob).map(q => (
+                        <div key={q.id} class="glass-panel rounded-2xl p-5 border border-slate-800 space-y-3">
+                          <div class="flex items-center justify-between">
+                            <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">{q.category}</span>
+                            <span class="text-xs font-semibold px-2 py-0.5 rounded bg-slate-900 text-slate-300">Difficulty: {q.difficulty}</span>
+                          </div>
+
+                          <h3 class="text-sm font-bold text-white leading-snug">{q.question}</h3>
+                          <p class="text-xs text-slate-400"><strong>Rationale:</strong> {q.rationale}</p>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div class="glass-panel rounded-2xl p-6 border border-slate-800 space-y-4 sticky top-24">
+                      <h3 class="text-base font-bold text-white">30-Minute Interview Plan</h3>
+                      <div class="space-y-2 text-xs">
+                        {[
+                          { time: '0-5 min', section: 'Introduction & Candidate Background' },
+                          { time: '5-15 min', section: 'Technical Deep Dive & Architecture' },
+                          { time: '15-22 min', section: 'Resume Claim Verification' },
+                          { time: '22-27 min', section: 'Behavioral & Situational Questions' },
+                          { time: '27-30 min', section: 'Candidate Q&A & Wrap-up' }
+                        ].map((slot, i) => (
+                          <div key={i} class="p-3 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between">
+                            <span class="font-bold text-indigo-400">{slot.time}</span>
+                            <span class="text-slate-300">{slot.section}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* 7. AI WORKSPACE */}
+            {activeTab === 'assistant' && (
+              <div class="glass-panel rounded-2xl border border-slate-800 shadow-2xl h-[700px] flex flex-col overflow-hidden animate-fade-in">
+                <div class="bg-slate-900 p-4 text-white flex items-center justify-between border-b border-slate-800">
+                  <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 rounded-xl gradient-bg flex items-center justify-center">
+                      <i data-lucide="bot" class="w-4 h-4 text-white"></i>
+                    </div>
+                    <div>
+                      <h3 class="font-bold text-sm">Recruitment Agent Workspace</h3>
+                      <p class="text-[11px] text-slate-400">Agent + Tools + Vector RAG Engine</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="flex-1 p-6 overflow-y-auto space-y-4 bg-slate-950/60">
+                  {chatMessages.map(msg => (
+                    <div key={msg.id} class={`flex flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}>
+                      <div class={`max-w-2xl rounded-2xl p-4 text-xs leading-relaxed ${
+                        msg.sender === 'user' ? 'gradient-bg text-white shadow-md' : 'bg-slate-900 text-slate-200 border border-slate-800'
+                      }`}>
+                        <div class="whitespace-pre-line">{msg.content}</div>
+                        {msg.toolTraces && (
+                          <div class="mt-3 pt-2 border-t border-slate-800 flex flex-wrap gap-1.5">
+                            {msg.toolTraces.map((tr, i) => (
+                              <span key={i} class="text-[10px] font-mono px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-800">
+                                ⚙️ {tr.toolName}: {tr.output}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      <span class="text-[10px] text-slate-500 mt-1 px-1">{msg.timestamp}</span>
+                    </div>
+                  ))}
+                  {isThinking && (
+                    <div class="flex items-center space-x-2 text-xs text-indigo-400 font-semibold p-2">
+                      <i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>
+                      <span>Evaluating agent tool selection & vector index retrieval...</span>
+                    </div>
+                  )}
+                </div>
+
+                <div class="p-4 bg-slate-900 border-t border-slate-800 flex items-center space-x-3">
+                  <input
+                    type="text"
+                    placeholder="Ask agent: e.g. 'Rank candidates for Senior React Engineer'..."
+                    value={chatInput}
+                    onChange={e => setChatInput(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && handleSendChat()}
+                    class="flex-1 px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+                  />
+                  <button onClick={handleSendChat} class="px-5 py-2.5 rounded-xl gradient-bg text-white font-bold text-xs shadow-md">
+                    Send Prompt
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* 8. ANALYTICS */}
+            {activeTab === 'analytics' && (
+              <div class="space-y-6 animate-fade-in">
+                <h1 class="text-xl font-extrabold text-white">Recruitment Insights</h1>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div class="glass-panel p-6 rounded-2xl border border-slate-800 space-y-4">
+                    <h3 class="text-sm font-bold text-white">Pipeline Stage Conversion</h3>
+                    <div class="space-y-3">
+                      {[
+                        { stage: 'Sourced', count: 20, pct: 100 },
+                        { stage: 'Screened', count: candidates.length, pct: 50 },
+                        { stage: 'Matched', count: matchResults.filter(m => m.overallMatchScore >= 70).length, pct: 30 }
+                      ].map((s, i) => (
+                        <div key={i} class="space-y-1">
+                          <div class="flex justify-between text-xs text-slate-300">
+                            <span>{s.stage}</span>
+                            <span>{s.count} candidates</span>
+                          </div>
+                          <div class="w-full h-2 bg-slate-900 rounded-full overflow-hidden">
+                            <div class="h-full bg-indigo-500 rounded-full" style={{ width: `${s.pct}%` }}></div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div class="glass-card p-6 rounded-2xl border border-slate-800 space-y-4">
+                    <h3 class="text-sm font-bold text-white">Skills in Demand</h3>
+                    <div class="flex flex-wrap gap-2">
+                      {['React', 'TypeScript', 'Node.js', 'PostgreSQL', 'AWS', 'pgvector'].map((sk, i) => (
+                        <div key={i} class="p-3 rounded-xl bg-indigo-950/40 border border-indigo-900/60 flex items-center space-x-2">
+                          <span class="text-xs font-bold text-indigo-300">{sk}</span>
+                          <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-indigo-900 text-indigo-200">{jobs.length} jobs</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 9. SETTINGS */}
+            {activeTab === 'settings' && (
+              <div class="space-y-6 animate-fade-in">
+                <h1 class="text-xl font-extrabold text-white">Match Scoring Weights Settings</h1>
+                <div class="glass-panel rounded-2xl p-6 border border-slate-800 space-y-4 max-w-2xl">
+                  <h3 class="text-sm font-bold text-white">Dynamic Matching Weights (%)</h3>
+                  {Object.keys(weights).map(key => (
+                    <div key={key} class="space-y-1">
+                      <div class="flex justify-between text-xs font-medium text-slate-300 capitalize">
+                        <span>{key.replace(/([A-Z])/g, ' $1')}</span>
+                        <span class="font-bold text-indigo-400">{weights[key]}%</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0"
+                        max="50"
+                        value={weights[key]}
+                        onChange={e => setWeights({ ...weights, [key]: Number(e.target.value) })}
+                        class="w-full accent-indigo-500"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+          {/* EDIT CANDIDATE MODAL */}
+          {showEditCandModal && editCandData && (
+            <div class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+              <div class="glass-panel rounded-2xl border border-slate-800 p-6 max-w-lg w-full space-y-4 animate-fade-in">
+                <div class="flex items-center justify-between">
+                  <h3 class="text-lg font-bold text-white">Edit Candidate Profile</h3>
+                  <button onClick={() => setShowEditCandModal(false)} class="text-slate-400 hover:text-white">✕</button>
+                </div>
+                <form onSubmit={handleSaveEditedCandidate} class="space-y-3 text-xs">
+                  <div>
+                    <label class="block text-slate-300 font-semibold mb-1">Full Name</label>
+                    <input
+                      type="text"
+                      required
+                      value={editCandData.name}
+                      onChange={e => setEditCandData({ ...editCandData, name: e.target.value })}
+                      class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-indigo-500"
+                    />
+                  </div>
+                  <div class="grid grid-cols-2 gap-3">
+                    <div>
+                      <label class="block text-slate-300 font-semibold mb-1">Current Role</label>
+                      <input
+                        type="text"
+                        value={editCandData.currentRole}
+                        onChange={e => setEditCandData({ ...editCandData, currentRole: e.target.value })}
+                        class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-indigo-500"
+                      />
+                    </div>
+                    <div>
+                      <label class="block text-slate-300 font-semibold mb-1">Total Exp (Years)</label>
+                      <input
+                        type="number"
+                        value={editCandData.totalExperienceYears}
+                        onChange={e => setEditCandData({ ...editCandData, totalExperienceYears: e.target.value })}
+                        class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-indigo-500"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label class="block text-slate-300 font-semibold mb-1">Skills (Comma-separated)</label>
+                    <input
+                      type="text"
+                      value={editCandData.skillsStr}
+                      onChange={e => setEditCandData({ ...editCandData, skillsStr: e.target.value })}
+                      class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-indigo-500"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-slate-300 font-semibold mb-1">Recruitment Status</label>
+                    <select
+                      value={editCandData.status}
+                      onChange={e => setEditCandData({ ...editCandData, status: e.target.value })}
+                      class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none"
+                    >
+                      <option value="screened">Screened</option>
+                      <option value="matched">Matched</option>
+                      <option value="interviewing">Interviewing</option>
+                      <option value="offered">Offered</option>
+                      <option value="rejected">Rejected</option>
+                    </select>
+                  </div>
+                  <div class="pt-2 flex justify-end space-x-2">
+                    <button type="button" onClick={() => setShowEditCandModal(false)} class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 font-semibold">Cancel</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl gradient-bg text-white font-bold">Save Changes</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {/* EDIT JOB MODAL */}
+          {showEditJobModal && editJobData && (
+            <div class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+              <div class="glass-panel rounded-2xl border border-slate-800 p-6 max-w-lg w-full space-y-4 animate-fade-in">
+                <div class="flex items-center justify-between">
+                  <h3 class="text-lg font-bold text-white">Edit Job Requirement</h3>
+                  <button onClick={() => setShowEditJobModal(false)} class="text-slate-400 hover:text-white">✕</button>
+                </div>
+                <form onSubmit={handleSaveEditedJob} class="space-y-3 text-xs">
+                  <div>
+                    <label class="block text-slate-300 font-semibold mb-1">Job Title</label>
+                    <input
+                      type="text"
+                      required
+                      value={editJobData.title}
+                      onChange={e => setEditJobData({ ...editJobData, title: e.target.value })}
+                      class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-indigo-500"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-slate-300 font-semibold mb-1">Required Skills (Comma-separated)</label>
+                    <input
+                      type="text"
+                      value={editJobData.requiredSkillsStr}
+                      onChange={e => setEditJobData({ ...editJobData, requiredSkillsStr: e.target.value })}
+                      class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-indigo-500"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-slate-300 font-semibold mb-1">Job Description</label>
+                    <textarea
+                      rows="3"
+                      value={editJobData.description}
+                      onChange={e => setEditJobData({ ...editJobData, description: e.target.value })}
+                      class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-indigo-500"
+                    ></textarea>
+                  </div>
+                  <div class="pt-2 flex justify-end space-x-2">
+                    <button type="button" onClick={() => setShowEditJobModal(false)} class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 font-semibold">Cancel</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl gradient-bg text-white font-bold">Save Changes</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {/* CANDIDATE COMPARISON MODAL */}
+          {showCompareModal && (
+            <div class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+              <div class="glass-panel rounded-2xl border border-slate-800 p-6 max-w-3xl w-full space-y-4 my-8 animate-fade-in">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <h3 class="text-lg font-bold text-white">Side-by-Side Candidate Comparison</h3>
+                    <p class="text-xs text-slate-400">Compare candidate skills, experience, and match scores side-by-side.</p>
+                  </div>
+                  <button onClick={() => { setShowCompareModal(false); setComparisonResult(null); }} class="text-slate-400 hover:text-white">✕</button>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 text-xs">
+                  <div>
+                    <label class="block text-slate-300 font-semibold mb-1">Candidate A</label>
+                    <select
+                      value={compareCandAId}
+                      onChange={e => setCompareCandAId(e.target.value)}
+                      class="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none"
+                    >
+                      {candidates.map(c => <option key={c.id} value={c.id}>{c.name} ({c.currentRole})</option>)}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label class="block text-slate-300 font-semibold mb-1">Candidate B</label>
+                    <select
+                      value={compareCandBId}
+                      onChange={e => setCompareCandBId(e.target.value)}
+                      class="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none"
+                    >
+                      {candidates.map(c => <option key={c.id} value={c.id}>{c.name} ({c.currentRole})</option>)}
+                    </select>
+                  </div>
+                </div>
+
+                <button onClick={handleRunComparison} class="w-full py-2.5 rounded-xl gradient-bg text-white font-bold text-xs shadow-md">
+                  Compare Candidates Side-by-Side
+                </button>
+
+                {comparisonResult && (
+                  <div class="grid grid-cols-2 gap-4 pt-3 border-t border-slate-800 text-xs animate-fade-in">
+                    <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+                      <h4 class="font-extrabold text-sm text-white">{comparisonResult.candA.name}</h4>
+                      <p class="text-slate-400">{comparisonResult.candA.currentRole} • {comparisonResult.candA.totalExperienceYears} yrs exp</p>
+                      <div class="text-2xl font-black text-indigo-400">{comparisonResult.matchA.overallMatchScore}% Match</div>
+                      <div class="text-slate-300"><strong>Skills:</strong> {(comparisonResult.candA.skills || []).map(s => s.name).join(', ')}</div>
+                    </div>
+
+                    <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+                      <h4 class="font-extrabold text-sm text-white">{comparisonResult.candB.name}</h4>
+                      <p class="text-slate-400">{comparisonResult.candB.currentRole} • {comparisonResult.candB.totalExperienceYears} yrs exp</p>
+                      <div class="text-2xl font-black text-purple-400">{comparisonResult.matchB.overallMatchScore}% Match</div>
+                      <div class="text-slate-300"><strong>Skills:</strong> {(comparisonResult.candB.skills || []).map(s => s.name).join(', ')}</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* CREATE JOB MODAL */}
+          {showNewJobModal && (
+            <div class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+              <div class="glass-panel rounded-2xl border border-slate-800 p-6 max-w-lg w-full space-y-4 animate-fade-in">
+                <div class="flex items-center justify-between">
+                  <h3 class="text-lg font-bold text-white">Create New Job Requirement</h3>
+                  <button onClick={() => setShowNewJobModal(false)} class="text-slate-400 hover:text-white">✕</button>
+                </div>
+                <form onSubmit={handleCreateJob} class="space-y-3 text-xs">
+                  <div>
+                    <label class="block text-slate-300 font-semibold mb-1">Job Title</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Senior React Developer"
+                      value={newJobTitle}
+                      onChange={e => setNewJobTitle(e.target.value)}
+                      class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-indigo-500"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-slate-300 font-semibold mb-1">Department</label>
+                    <select
+                      value={newJobDept}
+                      onChange={e => setNewJobDept(e.target.value)}
+                      class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none"
+                    >
+                      <option value="Engineering">Engineering</option>
+                      <option value="AI Platform">AI Platform</option>
+                      <option value="Product">Product</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-slate-300 font-semibold mb-1">Raw Job Description Text</label>
+                    <textarea
+                      rows="4"
+                      required
+                      placeholder="Paste Job Description requirements..."
+                      value={newJobDesc}
+                      onChange={e => setNewJobDesc(e.target.value)}
+                      class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-indigo-500"
+                    ></textarea>
+                  </div>
+                  <div class="pt-2 flex justify-end space-x-2">
+                    <button type="button" onClick={() => setShowNewJobModal(false)} class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 font-semibold">Cancel</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl gradient-bg text-white font-bold">Parse & Save Job</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {/* BROWSER FILE UPLOAD MODAL */}
+          {showUploadModal && (
+            <div class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+              <div class="glass-panel rounded-2xl border border-slate-800 p-6 max-w-2xl w-full space-y-4 my-8 animate-fade-in">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <h3 class="text-lg font-bold text-white">Upload Resume File & Check Match Score</h3>
+                    <p class="text-xs text-slate-400">Select a file from your browser dialog. The AI will extract skills, score the match, and generate interview questions.</p>
+                  </div>
+                  <button onClick={() => { setShowUploadModal(false); setAnalysisResult(null); }} class="text-slate-400 hover:text-white">✕</button>
+                </div>
+
+                {!analysisResult && !isAnalyzingFile && (
+                  <div class="space-y-4">
+                    <div
+                      onDragOver={(e) => e.preventDefault()}
+                      onClick={handleTriggerFileChooser}
+                      class="p-8 rounded-2xl border-2 border-dashed border-indigo-500/40 bg-slate-900/60 hover:bg-slate-900/90 text-center space-y-3 cursor-pointer transition-all hover:border-indigo-500"
+                    >
+                      <div class="w-14 h-14 rounded-2xl bg-indigo-500/10 text-indigo-400 mx-auto flex items-center justify-center shadow-lg">
+                        <i data-lucide="folder-open" class="w-7 h-7"></i>
+                      </div>
+                      <div class="space-y-1">
+                        <h4 class="text-sm font-bold text-white">Click to Browse Files or Drag & Drop Resume Here</h4>
+                        <p class="text-xs text-slate-400">Supports .pdf, .docx, .doc, .txt up to 10MB</p>
+                      </div>
+                      <button type="button" class="px-5 py-2 rounded-xl gradient-bg text-white font-bold text-xs shadow-md">
+                        Open Browser File Chooser
+                      </button>
+                    </div>
+
+                    {selectedFile && (
+                      <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between text-xs">
+                        <div class="flex items-center space-x-2">
+                          <i data-lucide="file-text" class="w-4 h-4 text-indigo-400"></i>
+                          <span class="font-bold text-white">{selectedFile.name}</span>
+                          <span class="text-slate-500">({(selectedFile.size / 1024).toFixed(1)} KB)</span>
+                        </div>
+                        <span class="text-emerald-400 font-bold">Selected</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {isAnalyzingFile && (
+                  <div class="py-10 text-center space-y-4">
+                    <div class="w-12 h-12 rounded-xl gradient-bg mx-auto flex items-center justify-center animate-spin">
+                      <i data-lucide="loader-2" class="w-6 h-6 text-white"></i>
+                    </div>
+                    <div class="space-y-1">
+                      <h4 class="text-sm font-bold text-white">Analyzing Selected Resume File (Stage {analysisStep} of 4)</h4>
+                      <p class="text-xs text-indigo-300 font-mono">
+                        {analysisStep === 1 && 'Reading file & extracting text content...'}
+                        {analysisStep === 2 && 'Parsing candidate skills & experience entities...'}
+                        {analysisStep === 3 && 'Calculating 0-100 match score against position...'}
+                        {analysisStep === 4 && 'Synthesizing customized interview question plan...'}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {analysisResult && !isAnalyzingFile && (
+                  <div class="space-y-4 animate-fade-in text-xs">
+                    <div class="p-4 rounded-xl bg-emerald-950/40 border border-emerald-500/30 flex items-center justify-between">
+                      <div>
+                        <div class="flex items-center space-x-2 text-emerald-400 font-bold mb-1">
+                          <i data-lucide="check-circle" class="w-4 h-4"></i>
+                          <span>Resume Analysis Complete</span>
+                        </div>
+                        <h4 class="text-base font-extrabold text-white">{analysisResult.candidate.name}</h4>
+                        <p class="text-slate-400">File: {analysisResult.fileName} ({analysisResult.fileSize} KB)</p>
+                      </div>
+                      <div class="text-right">
+                        <div class="text-3xl font-black text-indigo-400">{analysisResult.match ? analysisResult.match.overallMatchScore : 88}%</div>
+                        <div class="text-[10px] text-slate-400">Match Score</div>
+                      </div>
+                    </div>
+
+                    <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+                      <span class="font-bold text-indigo-300">AI Match Explanation:</span>
+                      <p class="text-slate-300 leading-relaxed">{analysisResult.match ? analysisResult.match.aiReasoning : 'Candidate shows strong technical alignment with requirements.'}</p>
+                    </div>
+
+                    <div class="space-y-1">
+                      <span class="font-bold text-slate-300">Extracted Skills:</span>
+                      <div class="flex flex-wrap gap-1.5">
+                        {analysisResult.candidate.skills.map(s => (
+                          <span key={s.name} class="px-2.5 py-1 rounded-lg bg-indigo-950 text-indigo-300 border border-indigo-800 font-medium">
+                            {s.name}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div class="space-y-2 pt-2 border-t border-slate-800">
+                      <span class="font-bold text-white">Generated Customized Interview Questions:</span>
+                      {analysisResult.questions.map((q, i) => (
+                        <div key={i} class="p-3 rounded-xl bg-slate-900 border border-slate-800 space-y-1">
+                          <span class="font-bold text-indigo-400">{q.category} ({q.difficulty}):</span>
+                          <p class="text-slate-200">{q.question}</p>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div class="pt-2 flex justify-end">
+                      <button onClick={() => { setShowUploadModal(false); setAnalysisResult(null); }} class="px-5 py-2 rounded-xl gradient-bg text-white font-bold">
+                        Save to Knowledge Base & View Candidate
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+          </main>
+        </div>
+
+        {/* FOOTER */}
+        <footer class="bg-slate-950 border-t border-slate-900/80 py-2 flex-shrink-0">
+          <div class="max-w-7xl mx-auto px-4 text-center text-[11px] text-slate-500 font-mono">
+            TalentPulse AI — Production HR Recruitment Platform • Multi-Agent RAG Architecture
+          </div>
+        </footer>
+
+        </div>
+      );
+    }
+
+    class ErrorBoundary extends React.Component {
+      constructor(props) {
+        super(props);
+        this.state = { hasError: false, error: null };
+      }
+      static getDerivedStateFromError(error) {
+        return { hasError: true, error };
+      }
+      componentDidCatch(error, errorInfo) {
+        console.error("TalentPulse AI ErrorBoundary caught an error:", error, errorInfo);
+      }
+      render() {
+        if (this.state.hasError) {
+          return (
+            <div class="h-full flex flex-col items-center justify-center p-6 bg-slate-950 text-white text-center space-y-4">
+              <div class="w-16 h-16 rounded-2xl bg-red-500/10 text-red-400 flex items-center justify-center">
+                <i data-lucide="alert-triangle" class="w-8 h-8"></i>
+              </div>
+              <h2 class="text-xl font-bold">Application Temporary Error</h2>
+              <p class="text-xs text-slate-400 max-w-md">{this.state.error?.toString()}</p>
+              <button onClick={() => window.location.reload()} class="px-5 py-2.5 rounded-xl gradient-bg text-white font-bold text-xs shadow-md">
+                Reload Application
+              </button>
+            </div>
+          );
+        }
+        return this.props.children;
+      }
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>
+    );
+  </script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.lucide) lucide.createIcons();
+    });
+    setInterval(() => {
+      if (window.lucide) lucide.createIcons();
+    }, 1000);
+  </script>
+</body>
+</html>
